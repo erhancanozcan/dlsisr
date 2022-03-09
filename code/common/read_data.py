@@ -6,8 +6,8 @@ from PIL import Image
 import torch   
 
 
-def prepare_images_att(num_people,num_pic_tr,num_pic_te):
-    path = '/content/gdrive/Shareddrives/EC503 Project Team/Code/ORL-DATABASE'
+def prepare_images_att(path,p_seen_people=0.8,num_pic_tr=8,num_pic_te=2):
+    #path = '/content/gdrive/Shareddrives/EC503 Project Team/Code/ORL-DATABASE'
     X = []
     y = []
     for i in range(40):
@@ -31,6 +31,8 @@ def prepare_images_att(num_people,num_pic_tr,num_pic_te):
     
     
     
+    num_people=int(40*p_seen_people)
+    
     
     ind=np.arange(num_people)
     train_ind=ind*10
@@ -41,8 +43,8 @@ def prepare_images_att(num_people,num_pic_tr,num_pic_te):
         
     train_ind=np.sort(train_ind)
     
-    np_training_input=X[train_ind,]    
-    np_training_class=y[train_ind,]
+    seen_people_tr=X[train_ind,]    
+    #np_training_class=y[train_ind,]
     
     
     ind=np.arange(num_people)
@@ -53,10 +55,21 @@ def prepare_images_att(num_people,num_pic_tr,num_pic_te):
         
     test_ind=np.sort(test_ind)
     
-    np_test_input=X[test_ind,]    
-    np_test_class=y[test_ind,]
+    seen_people_te=X[test_ind,]    
+    #np_test_class=y[test_ind,]
+    
+    ind=np.arange(num_people,40,1)
+    unseen_ind=ind*10
+    tmp=ind*10
+    
+    for i in range(9):
+        unseen_ind=np.concatenate([unseen_ind,tmp+1+i])
+        
+    unseen_ind=np.sort(unseen_ind)
+    
+    unseen_people=X[unseen_ind,]    
     
 
 
 
-    return width,height,np_training_input,np_test_input,np_training_class,np_test_class
+    return seen_people_tr,seen_people_te,unseen_people
