@@ -103,38 +103,28 @@ def get_experiment_configuration(num_iters=200000,
 if __name__ == '__main__':
     # For fast training.
     cudnn.benchmark = True
-    #run with mse for first 100
-    # config = get_experiment_configuration(num_iters=500, 
-    #       log_step=10, sample_step=10, model_save_step=10, 
-    #       batch_size=8, mode='train', content_loss='mse',
-    #       resume_iters=False, load_iters = 50)
-    # main(config)
-  
-    # config = get_experiment_configuration(num_iters=500, 
-    #       log_step=50, sample_step=50, model_save_step=50, 
-    #       batch_size=8, mode='test', content_loss='mse',
-    #       resume_iters=True, load_iters = 500)
-    # main(config)
-    
-    # config = get_experiment_configuration(num_iters=500, 
-    #       log_step=50, sample_step=50, model_save_step=50, 
-    #       batch_size=8, mode='valid', content_loss='mse',
-    #       resume_iters=True, load_iters = 500)
-    # main(config)
+    #run with mse for first 500
+    config = get_experiment_configuration(num_iters=500, 
+          log_step=50, sample_step=50, model_save_step=50, 
+          batch_size=8, mode='train', content_loss='mse',
+          resume_iters=False, load_iters = 50)
+    main(config)
     
     #run with vgg
-    # config = get_experiment_configuration(num_iters=5500, 
-    #       log_step=50, sample_step=50, model_save_step=50, 
-    #       batch_size=8, mode='train', content_loss='vgg',
-    #       resume_iters=True, load_iters = 1500)
-    # main(config)
+    config = get_experiment_configuration(num_iters=5500, 
+          log_step=50, sample_step=50, model_save_step=50, 
+          batch_size=8, mode='train', content_loss='vgg',
+          resume_iters=True, load_iters = 1500)
+    main(config)
       
+    #run on test dataset
     config = get_experiment_configuration(num_iters=5500, 
           log_step=50, sample_step=50, model_save_step=50, 
           batch_size=8, mode='test', content_loss='vgg',
           resume_iters=False, load_iters=5500)
     main(config)
     
+    # run on validation dataset
     config = get_experiment_configuration(num_iters=5500, 
           log_step=50, sample_step=50, model_save_step=50, 
           batch_size=8, mode='valid', content_loss='vgg',
