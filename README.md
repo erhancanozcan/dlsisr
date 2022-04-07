@@ -9,3 +9,8 @@ The training, testing, and validation are handled by solver.py.
 We define a custom PyTorch dataset for the AT&T images in datasets.py.
 
 The configuration of our runs, including the pre-training step, selection of VGG19 feature layer, and other hyperparameters, are handled in main.py.
+
+REFERENCES
+1. StarGAN - Official PyTorch Implementation https://github.com/yunjey/stargan
+2. SRGAN-PyTorch https://github.com/Lornatang/SRGAN-PyTorch
+3. PyTorch-GAN https://github.com/eriklindernoren/PyTorch-GAN/blob/master/implementations/srgan/srgan.py 
