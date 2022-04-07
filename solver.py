@@ -391,13 +391,13 @@ class Solver(object):
         array = np.transpose(np.array([MSE_losses, MSE_seen, MSE_unseen]))
         np.savetxt(os.path.join(self.log_dir, 'losses_MSE.csv'), array, delimiter = ",", header="train, seen, unseen")
         
-        array = np.transpose(np.array([L1_losses, L1_seen, L1_unseen]).transpose())
+        array = np.transpose(np.array([L1_losses, L1_seen, L1_unseen]))
         np.savetxt(os.path.join(self.log_dir, 'losses_MSE.csv'), array, delimiter = ",", header="train, seen, unseen")
         
-        array = np.transpose(np.array([PSNR_losses, PSNR_seen, PSNR_unseen]).transpose())
+        array = np.transpose(np.array([PSNR_losses, PSNR_seen, PSNR_unseen]))
         np.savetxt(os.path.join(self.log_dir, 'losses_MSE.csv'), array, delimiter = ",", header="train, seen, unseen")
         
-        array = np.transpose(np.array([SSIM_losses, SSIM_seen, SSIM_unseen]).transpose())
+        array = np.transpose(np.array([SSIM_losses, SSIM_seen, SSIM_unseen]))
         np.savetxt(os.path.join(self.log_dir, 'losses_MSE.csv'), array, delimiter = ",", header="train, seen, unseen")
         
         # find losses for bicubic
