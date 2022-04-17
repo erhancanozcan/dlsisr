@@ -1,17 +1,21 @@
 import os
 import torch
+from datetime import datetime
 from solver import Solver
 from data_loader import get_loader
 from torch.backends import cudnn
-os.system('pip3 install -r requirements.txt')
+#os.system('pip3 install -r requirements.txt')
 
-EXPERIMENTS_DIRECTORY = '/projectnb/dl523/projects/SRGAN/srgan_hw4/experiments/'
+project_dir = os.path.dirname(os.path.abspath(__file__))
+
+#EXPERIMENTS_DIRECTORY = '/projectnb/dl523/projects/SRGAN/srgan_hw4/experiments/'
+#EXPERIMENTS_DIRECTORY = os.path.join( project_dir, 'checkpoints', datetime.now().strftime("%d%b%y_%H%M%S") ) + '/'
+EXPERIMENTS_DIRECTORY = os.path.join( project_dir, 'checkpoints', '16Apr22_185018/' )
 
 def str2bool(v):
     return v.lower() in ('true')
 
 def main(config):
-
     # Data loader.
     print(config['mode'])
     train_loader, test_loader, validate_loader = get_loader(config, config['mode'])
@@ -103,18 +107,19 @@ def get_experiment_configuration(num_iters=200000,
 if __name__ == '__main__':
     # For fast training.
     cudnn.benchmark = True
-    #run with mse for first 500
-    config = get_experiment_configuration(num_iters=500,
-          log_step=50, sample_step=50, model_save_step=50,
-          batch_size=8, mode='train', content_loss='mse',
-          resume_iters=False, load_iters = 50)
-    main(config)
+    
+    #run with mse for first 500, commented out because crashed after this pre-training step trying to load iter 1500 but num_iters was 500
+    #config = get_experiment_configuration(num_iters=500,
+    #      log_step=50, sample_step=50, model_save_step=50,
+    #      batch_size=8, mode='train', content_loss='mse',
+    #      resume_iters=False, load_iters = 50)
+    #main(config)
 
     #run with vgg
     config = get_experiment_configuration(num_iters=5500,
           log_step=50, sample_step=50, model_save_step=50,
           batch_size=8, mode='train', content_loss='vgg',
-          resume_iters=True, load_iters = 1500)
+          resume_iters=True, load_iters = 500)
     main(config)
 
     #run on test dataset
