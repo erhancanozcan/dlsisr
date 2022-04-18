@@ -9,6 +9,7 @@ import sys
 sys.path.append('./common')
 
 from common.disruptor import add_blur_decrease_size
+from common.disruptor import downsampler
 
 
 #%% Custom ATT dataset loader
@@ -25,9 +26,12 @@ class ATTImages(Dataset):
             ])
         self.resize_dim = hr_resize_dim
         self.desired_dim = lr_desired_dim
+        
+        self.ds=downsampler()
 
         _, _, self.hr = add_blur_decrease_size(self.people, self.resize_dim, add_blur=False)
-        _, _, self.lr = add_blur_decrease_size(self.people, self.desired_dim, add_blur=False)
+        #_, _, self.lr = add_blur_decrease_size(self.hr, self.desired_dim, add_blur=False)
+        self.lr = self.ds(self.hr)
 
     def __getitem__(self, index):
         lr = self.normalize(self.lr[index])

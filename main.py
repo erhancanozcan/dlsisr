@@ -102,7 +102,7 @@ def get_experiment_configuration(num_iters=200000,
 
 if __name__ == '__main__':
     # For fast training.
-    cudnn.benchmark = True
+    #cudnn.benchmark = True
     #run with mse for first 500
     config = get_experiment_configuration(num_iters=500,
           log_step=50, sample_step=50, model_save_step=50,
