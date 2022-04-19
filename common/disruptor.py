@@ -15,7 +15,7 @@ class downsampler(nn.Module):
     def __init__(self):
         super(downsampler, self).__init__()
         
-        print("can")
+        #print("can")
         self.downsample=nn.Sequential(
             nn.AvgPool2d(2, stride=2),
             nn.AvgPool2d(2, stride=2)
@@ -26,11 +26,12 @@ class downsampler(nn.Module):
     
     def forward(self,x):
         x=torch.tensor(x,dtype=torch.float32)
-        print(x.shape)
-        if len(x.shape)!=3:
+        #print(x.shape)
+        if len(x.shape)==2:
             x = torch.unsqueeze(x, dim=0)
         #print(x)
-        low_res=self.downsample(x)
+        low_res=self.downsample(x).unsqueeze(1)
+        #print(x.shape)
         return low_res
 
 def add_blur_decrease_size_mod(np_training_input,np_test_input,desired_dim):
