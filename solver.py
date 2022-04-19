@@ -363,7 +363,7 @@ class Solver(object):
                 imgs_bicub = make_grid(imgs_bicub, nrow=1, normalize=False)
 
                 img_grid = torch.cat((imgs_lr, imgs_hr, imgs_bicub, gen_hr), -1)
-                save_image(img_grid, sample_path, normalize=False)
+                save_image(img_grid, sample_path, normalize=True)
                 print('Saved real and fake images into {}...'.format(sample_path))
 
             # Save model checkpoints.
@@ -454,7 +454,7 @@ class Solver(object):
                 imgs_bicub = make_grid(imgs_bicub, nrow=1, normalize=False)
 
                 img_grid = torch.cat((imgs_lr, imgs_hr, imgs_bicub, gen_hr), -1)
-                save_image(img_grid, result_path, normalize=False)
+                save_image(img_grid, result_path, normalize=True)
                 print('Saved real and fake images into {}...'.format(result_path))
 
 
