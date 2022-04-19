@@ -12,6 +12,7 @@ from torchvision.utils import make_grid
 import matplotlib.pyplot as plt
 import numpy as np
 import torchvision.transforms as transforms
+from common.disruptor import downsampler
 
 
 class Solver(object):
@@ -59,6 +60,9 @@ class Solver(object):
         self.sample_step = config['sample_step']
         self.model_save_step = config['model_save_step']
         self.lr_update_step = config['lr_update_step']
+        
+        # Downsampler to use in reconstruction loss
+        self.ds=downsampler()
 
         # Build the model.
         self.build_model()
@@ -154,6 +158,7 @@ class Solver(object):
         # Losses
         mse = nn.MSELoss(reduction='sum').to(self.device)
         bce = nn.BCEWithLogitsLoss().to(self.device)
+        l1 = nn.L1Loss()
 
         # Content loss
         if self.content_loss == 'mse':
@@ -165,11 +170,19 @@ class Solver(object):
 
         # Adversarial loss
         loss_adversarial = bce(self.D(gen_hr), fake)
+        
+        # Reconstruction loss
+        loss_reconstruction=l1(self.ds(imgs_hr),self.ds(gen_hr))
+        """
+        TODO
+            lambda_rec should be hyperparameter and we can try to tune it.
+        """
+        lambda_rec=1e-4
 
         # Perceptual loss
-        g_loss = loss_content + 1e-3 * loss_adversarial
+        g_loss = loss_content + 1e-3 * loss_adversarial + lambda_rec * loss_reconstruction
 
-        return g_loss, loss_content, loss_adversarial
+        return g_loss, loss_content, loss_adversarial,loss_reconstruction
 
     def discriminator_loss(self, imgs_lr, imgs_hr, valid, fake):
         bce = nn.BCEWithLogitsLoss().to(self.device)
@@ -251,6 +264,7 @@ class Solver(object):
 
         content_losses = []
         advers_losses = []
+        rec_losses = []
 
         MSE_losses = []
         L1_losses = []
@@ -304,7 +318,7 @@ class Solver(object):
                 gen_hr = self.G(imgs_lr).to(self.device)
 
                 # Backward and optimize.
-                g_loss, loss_content, loss_adversarial = self.generator_loss(gen_hr, imgs_hr, valid, fake)
+                g_loss, loss_content, loss_adversarial,loss_reconstruction = self.generator_loss(gen_hr, imgs_hr, valid, fake)
                 g_loss.backward()
                 self.g_optimizer.step()
 
@@ -317,6 +331,7 @@ class Solver(object):
                 D_losses.append(d_loss)
                 content_losses.append(loss_content)
                 advers_losses.append(loss_adversarial)
+                rec_losses.append(loss_reconstruction)
 
 
             # find losses for training data
