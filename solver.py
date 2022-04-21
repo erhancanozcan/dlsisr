@@ -161,7 +161,7 @@ class Solver(object):
         elif self.content_loss == 'vgg':
             gen_features = self.VGG19(gen_hr)
             real_features = self.VGG19(imgs_hr)
-            loss_content = mse(gen_features, real_features.detach())/real_features.shape[1]**2
+            loss_content = 0.006 * mse(gen_features, real_features.detach())/real_features.shape[1]**2
 
         # Adversarial loss
         loss_adversarial = bce(self.D(gen_hr), fake)
@@ -391,13 +391,13 @@ class Solver(object):
         array = np.transpose(np.array([MSE_losses, MSE_seen, MSE_unseen]))
         np.savetxt(os.path.join(self.log_dir, 'losses_MSE.csv'), array, delimiter = ",", header="train, seen, unseen")
         
-        array = np.transpose(np.array([L1_losses, L1_seen, L1_unseen]))
+        array = np.transpose(np.array([L1_losses, L1_seen, L1_unseen]).transpose())
         np.savetxt(os.path.join(self.log_dir, 'losses_MSE.csv'), array, delimiter = ",", header="train, seen, unseen")
         
-        array = np.transpose(np.array([PSNR_losses, PSNR_seen, PSNR_unseen]))
+        array = np.transpose(np.array([PSNR_losses, PSNR_seen, PSNR_unseen]).transpose())
         np.savetxt(os.path.join(self.log_dir, 'losses_MSE.csv'), array, delimiter = ",", header="train, seen, unseen")
         
-        array = np.transpose(np.array([SSIM_losses, SSIM_seen, SSIM_unseen]))
+        array = np.transpose(np.array([SSIM_losses, SSIM_seen, SSIM_unseen]).transpose())
         np.savetxt(os.path.join(self.log_dir, 'losses_MSE.csv'), array, delimiter = ",", header="train, seen, unseen")
         
         # find losses for bicubic
