@@ -79,9 +79,11 @@ def get_experiment_configuration(num_iters=200000,
 
     if config['mode'] == 'test':
         config['result_dir'] = EXPERIMENT_RESULTS_FOLDER + 'test_result_dir'
+        config['log_dir'] = EXPERIMENT_RESULTS_FOLDER + 'test_log_dir'
 
     elif config['mode'] == 'valid':
         config['result_dir'] = EXPERIMENT_RESULTS_FOLDER + 'valid_result_dir'
+        config['log_dir'] = EXPERIMENT_RESULTS_FOLDER + 'valid_log_dir'
 
     print('\n\nPlease ensure you are using a GPU for computation')
     print('Will be using the following device for computation : ', config['device'])
