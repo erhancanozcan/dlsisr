@@ -402,20 +402,20 @@ class Solver(object):
         self.plot_all_losses(PSNR_losses, PSNR_seen, PSNR_unseen, "PSNR", "PSNR loss")
         self.plot_all_losses(SSIM_losses, SSIM_seen, SSIM_unseen, "SSIM", "SSIM loss")
 
-        array = np.transpose(np.array([G_losses, D_losses, content_losses, advers_losses]))
-        np.savetxt(os.path.join(self.log_dir, 'losses_G_D.csv'), array, delimiter = ",", header="G, D, content, adver")
+        array = np.transpose(np.array([G_losses, D_losses, content_losses, advers_losses, rec_losses]))
+        np.savetxt(os.path.join(self.log_dir, 'losses_G_D.csv'), array, delimiter = ",", header="G, D, content, adver, recon")
 
         array = np.transpose(np.array([MSE_losses, MSE_seen, MSE_unseen]))
         np.savetxt(os.path.join(self.log_dir, 'losses_MSE.csv'), array, delimiter = ",", header="train, seen, unseen")
         
         array = np.transpose(np.array([L1_losses, L1_seen, L1_unseen]).transpose())
-        np.savetxt(os.path.join(self.log_dir, 'losses_MSE.csv'), array, delimiter = ",", header="train, seen, unseen")
+        np.savetxt(os.path.join(self.log_dir, 'losses_L1.csv'), array, delimiter = ",", header="train, seen, unseen")
         
         array = np.transpose(np.array([PSNR_losses, PSNR_seen, PSNR_unseen]).transpose())
-        np.savetxt(os.path.join(self.log_dir, 'losses_MSE.csv'), array, delimiter = ",", header="train, seen, unseen")
+        np.savetxt(os.path.join(self.log_dir, 'losses_PSNR.csv'), array, delimiter = ",", header="train, seen, unseen")
         
         array = np.transpose(np.array([SSIM_losses, SSIM_seen, SSIM_unseen]).transpose())
-        np.savetxt(os.path.join(self.log_dir, 'losses_MSE.csv'), array, delimiter = ",", header="train, seen, unseen")
+        np.savetxt(os.path.join(self.log_dir, 'losses_SSIM.csv'), array, delimiter = ",", header="train, seen, unseen")
 
         # find losses for bicubic
         mse_train, l1_train, psnr_train, ssim_train = self.ave_losses(self.train_loader, 'bicubic')
