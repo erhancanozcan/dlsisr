@@ -177,7 +177,7 @@ class Solver(object):
         TODO
             lambda_rec should be hyperparameter and we can try to tune it.
         """
-        lambda_rec=1e-4
+        lambda_rec=1e-1
 
         # Perceptual loss
         g_loss = loss_content + 1e-3 * loss_adversarial + lambda_rec * loss_reconstruction
@@ -372,13 +372,15 @@ class Solver(object):
                 # add padding to make image size from 16x16 to 64x64 for display
                 tr = transforms.Pad(24)
 
-                imgs_lr = make_grid(tr(imgs_lr), nrow=1, normalize=False)
-                imgs_hr = make_grid(imgs_hr, nrow=1, normalize=False)
-                gen_hr = make_grid(gen_hr, nrow=1, normalize=False)
-                imgs_bicub = make_grid(imgs_bicub, nrow=1, normalize=False)
+                hr_range = (torch.min(imgs_hr), torch.max(imgs_hr))
+
+                imgs_lr = make_grid(tr(imgs_lr), nrow=1, normalize=True, value_range=hr_range)
+                imgs_hr = make_grid(imgs_hr, nrow=1, normalize=True, value_range=hr_range)
+                gen_hr = make_grid(gen_hr, nrow=1, normalize=True, value_range=hr_range)
+                imgs_bicub = make_grid(imgs_bicub, nrow=1, normalize=True, value_range=hr_range)
 
                 img_grid = torch.cat((imgs_lr, imgs_hr, imgs_bicub, gen_hr), -1)
-                save_image(img_grid, sample_path, normalize=True)
+                save_image(img_grid, sample_path, normalize=False)
                 print('Saved real and fake images into {}...'.format(sample_path))
 
             # Save model checkpoints.
@@ -463,13 +465,15 @@ class Solver(object):
                 # add padding to make image size from 16x16 to 64x64 for display
                 tr = transforms.Pad(24)
 
-                imgs_lr = make_grid(tr(imgs_lr), nrow=1, normalize=False)
-                imgs_hr = make_grid(imgs_hr, nrow=1, normalize=False)
-                gen_hr = make_grid(gen_hr, nrow=1, normalize=False)
-                imgs_bicub = make_grid(imgs_bicub, nrow=1, normalize=False)
+                hr_range = (torch.min(imgs_hr), torch.max(imgs_hr))
+
+                imgs_lr = make_grid(tr(imgs_lr), nrow=1, normalize=True, value_range=hr_range)
+                imgs_hr = make_grid(imgs_hr, nrow=1, normalize=True, value_range=hr_range)
+                gen_hr = make_grid(gen_hr, nrow=1, normalize=True, value_range=hr_range)
+                imgs_bicub = make_grid(imgs_bicub, nrow=1, normalize=True, value_range=hr_range)
 
                 img_grid = torch.cat((imgs_lr, imgs_hr, imgs_bicub, gen_hr), -1)
-                save_image(img_grid, result_path, normalize=True)
+                save_image(img_grid, result_path, normalize=False)
                 print('Saved real and fake images into {}...'.format(result_path))
 
 
