@@ -162,27 +162,32 @@ class Solver(object):
 
         # Content loss
         if self.content_loss == 'mse':
-            loss_content = mse(imgs_hr, gen_hr)
+            WH = imgs_hr.shape[2]*imgs_hr.shape[3]
+            
+            loss_content = mse(imgs_hr, gen_hr)/WH
         elif self.content_loss == 'vgg':
             gen_features = self.VGG19(gen_hr)
             real_features = self.VGG19(imgs_hr)
-            loss_content = 0.006 * mse(gen_features, real_features.detach())/real_features.shape[1]**2
+
+            WH = real_features.shape[2]*real_features.shape[3]
+            loss_content = 0.006*mse(gen_features, real_features.detach())/WH
 
         # Adversarial loss
         loss_adversarial = bce(self.D(gen_hr), fake)
         
         # Reconstruction loss
-        loss_reconstruction=l1(self.ds(imgs_hr),self.ds(gen_hr))
+        loss_reconstruction = l1(self.ds(imgs_hr),self.ds(gen_hr))
         """
         TODO
             lambda_rec should be hyperparameter and we can try to tune it.
         """
-        lambda_rec=1e-1
+        #lambda_rec=1e-1
+        lambda_rec=1
 
         # Perceptual loss
-        g_loss = loss_content + 1e-3 * loss_adversarial + lambda_rec * loss_reconstruction
+        g_loss = loss_content + loss_adversarial + lambda_rec * loss_reconstruction
 
-        return g_loss, loss_content, loss_adversarial,loss_reconstruction
+        return g_loss, loss_content, loss_adversarial, loss_reconstruction
 
     def discriminator_loss(self, imgs_lr, imgs_hr, valid, fake):
         bce = nn.BCEWithLogitsLoss().to(self.device)
@@ -318,7 +323,7 @@ class Solver(object):
                 gen_hr = self.G(imgs_lr).to(self.device)
 
                 # Backward and optimize.
-                g_loss, loss_content, loss_adversarial,loss_reconstruction = self.generator_loss(gen_hr, imgs_hr, valid, fake)
+                g_loss, loss_content, loss_adversarial, loss_reconstruction = self.generator_loss(gen_hr, imgs_hr, valid, fake)
                 g_loss.backward()
                 self.g_optimizer.step()
 
@@ -326,6 +331,7 @@ class Solver(object):
                 loss['G/loss'] = g_loss.item()
                 loss['G/loss_content'] = loss_content.item()
                 loss['G/loss_adversarial'] = loss_adversarial.item()
+                loss['G/loss_reconstruction'] = loss_reconstruction.item()
 
                 G_losses.append(g_loss)
                 D_losses.append(d_loss)
@@ -408,13 +414,13 @@ class Solver(object):
         array = np.transpose(np.array([MSE_losses, MSE_seen, MSE_unseen]))
         np.savetxt(os.path.join(self.log_dir, 'losses_MSE.csv'), array, delimiter = ",", header="train, seen, unseen")
         
-        array = np.transpose(np.array([L1_losses, L1_seen, L1_unseen]).transpose())
+        array = np.transpose(np.array([L1_losses, L1_seen, L1_unseen]))
         np.savetxt(os.path.join(self.log_dir, 'losses_L1.csv'), array, delimiter = ",", header="train, seen, unseen")
         
-        array = np.transpose(np.array([PSNR_losses, PSNR_seen, PSNR_unseen]).transpose())
+        array = np.transpose(np.array([PSNR_losses, PSNR_seen, PSNR_unseen]))
         np.savetxt(os.path.join(self.log_dir, 'losses_PSNR.csv'), array, delimiter = ",", header="train, seen, unseen")
         
-        array = np.transpose(np.array([SSIM_losses, SSIM_seen, SSIM_unseen]).transpose())
+        array = np.transpose(np.array([SSIM_losses, SSIM_seen, SSIM_unseen]))
         np.savetxt(os.path.join(self.log_dir, 'losses_SSIM.csv'), array, delimiter = ",", header="train, seen, unseen")
 
         # find losses for bicubic

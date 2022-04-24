@@ -9,7 +9,8 @@ from torch.backends import cudnn
 project_dir = os.path.dirname(os.path.abspath(__file__))
 
 #EXPERIMENTS_DIRECTORY = '/projectnb/dl523/projects/SRGAN/srgan_hw4/experiments/'
-EXPERIMENTS_DIRECTORY = os.path.join( project_dir, 'checkpoints', datetime.now().strftime("%d%b%y_%H%M%S") ) + '/'
+#EXPERIMENTS_DIRECTORY = os.path.join( project_dir, 'checkpoints', datetime.now().strftime("%d%b%y_%H%M%S") ) + '/'
+EXPERIMENTS_DIRECTORY = os.path.join( project_dir, 'checkpoints/24Apr22_112456/' )
 
 def str2bool(v):
     return v.lower() in ('true')
@@ -36,7 +37,7 @@ def main(config):
 def get_experiment_configuration(num_iters=200000,
           log_step=100, sample_step=100, model_save_step=10000, 
           lr_update_step=100, batch_size=16, mode='train', content_loss='mse', 
-          resume_iters=False, load_iters = 300, vgg_layer = 29):
+          resume_iters=False, load_iters = 300, vgg_layer = 29, g_lr=0.0001, d_lr=0.0001):
     config = {}
 
     config['data_dir'] = 'ORL-DATABASE'
@@ -49,11 +50,11 @@ def get_experiment_configuration(num_iters=200000,
     config['batch_size'] = batch_size #16
     config['num_iters'] = num_iters
     config['num_iters_decay'] = num_iters//2
-    config['g_lr'] = 0.0001
-    config['d_lr'] = 0.0001
-    if content_loss == 'vgg':
-        config['g_lr'] = 0.0001
-        config['d_lr'] = 0.0001
+    config['g_lr'] = g_lr
+    config['d_lr'] = d_lr
+    #if content_loss == 'vgg':
+    #    config['g_lr'] = 0.0001
+    #    config['d_lr'] = 0.0001
     config['n_critic'] = 5
     config['beta1'] = 0.5 #v
     config['beta2'] = 0.999 #v
@@ -108,40 +109,42 @@ if __name__ == '__main__':
     cudnn.benchmark = True
     
     #run with mse for first 100
-    config = get_experiment_configuration(num_iters=500, 
-          log_step=10, sample_step=10, model_save_step=10, 
-          batch_size=8, mode='train', content_loss='mse',
-          resume_iters=False, load_iters = 50)
-    main(config)
+    #mse_iters = 1000
+    #config = get_experiment_configuration(num_iters=mse_iters, 
+    #      log_step=10, sample_step=10, model_save_step=10, 
+    #      batch_size=8, mode='train', content_loss='mse',
+    #      resume_iters=False, load_iters = 50)
+    #main(config)
   
-    config = get_experiment_configuration(num_iters=500, 
-          log_step=50, sample_step=50, model_save_step=50, 
-          batch_size=8, mode='test', content_loss='mse',
-          resume_iters=True, load_iters = 500)
-    main(config)
+    #config = get_experiment_configuration(num_iters=mse_iters, 
+    #      log_step=50, sample_step=50, model_save_step=50, 
+    #      batch_size=8, mode='test', content_loss='mse',
+    #      resume_iters=True, load_iters = 1000)
+    #main(config)
     
-    config = get_experiment_configuration(num_iters=500, 
-          log_step=50, sample_step=50, model_save_step=50, 
-          batch_size=8, mode='valid', content_loss='mse',
-          resume_iters=True, load_iters = 500)
-    main(config)
+    #config = get_experiment_configuration(num_iters=mse_iters, 
+    #      log_step=50, sample_step=50, model_save_step=50, 
+    #      batch_size=8, mode='valid', content_loss='mse',
+    #      resume_iters=True, load_iters = 1000)
+    #main(config)
     
     #run with vgg
-    config = get_experiment_configuration(num_iters=1500, 
+    vgg_iters = mse_iters + 2000
+    config = get_experiment_configuration(num_iters=vgg_iters,
           log_step=50, sample_step=50, model_save_step=50, 
           batch_size=8, mode='train', content_loss='vgg',
-          resume_iters=True, load_iters = 500, vgg_layer = 28)
+          resume_iters=True, load_iters = mse_iters, vgg_layer = 28, g_lr=1e-5, d_lr=1e-5)
     main(config)
       
-    config = get_experiment_configuration(num_iters=1500, 
+    config = get_experiment_configuration(num_iters=vgg_iters, 
           log_step=50, sample_step=50, model_save_step=50, 
           batch_size=8, mode='test', content_loss='vgg',
-          resume_iters=False, load_iters=1500)
+          resume_iters=False, load_iters=mse_iters)
     main(config)
     
-    config = get_experiment_configuration(num_iters=1500, 
+    config = get_experiment_configuration(num_iters=vgg_iters, 
           log_step=50, sample_step=50, model_save_step=50, 
           batch_size=8, mode='valid', content_loss='vgg',
-          resume_iters=False, load_iters = 1500)
+          resume_iters=False, load_iters = mse_iters)
     main(config)
 
