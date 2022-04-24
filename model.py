@@ -33,6 +33,18 @@ class ConvolutionalResidualBlock(nn.Module):
 
     def forward(self, x):
         return x + self.layers(x)
+    
+class NoBatchNormConvolutionalResidualBlock(nn.Module):
+    def __init__(self, k=3, n=64, s=1, p=1):
+        super(ConvolutionalResidualBlock, self).__init__()
+        self.layers = nn.Sequential(
+            nn.Conv2d(n, n, kernel_size=k, stride=s, padding=p),
+            nn.PReLU(),
+            nn.Conv2d(n, n, kernel_size=k, stride=s, padding=p),
+        )
+
+    def forward(self, x):
+        return x + self.layers(x)
 
 class Upsampler(nn.Module):
     def __init__(self, in_channels, k=3, n=256, s=1, p=1, upscale=2):
@@ -48,7 +60,7 @@ class Upsampler(nn.Module):
         return self.layers(x)
 
 class Generator(nn.Module):
-    def __init__(self, in_channels=3, out_channels=3, n_crb=16, n_features=64):
+    def __init__(self, in_channels=3, out_channels=3, n_crb=16, n_features=64, include_batch_norm=True):
         super(Generator, self).__init__()
 
         # Pre-convolutional residual blocks
@@ -58,7 +70,8 @@ class Generator(nn.Module):
             )
 
         # Residual blocks
-        generate_crb = (ConvolutionalResidualBlock(n=n_features) for _ in range(n_crb))
+        residualBlock = ConvolutionalResidualBlock if include_batch_norm else NoBatchNormConvolutionalResidualBlock
+        generate_crb = (residualBlock(n=n_features) for _ in range(n_crb))
         self.crbs = nn.Sequential(*list(generate_crb))
 
         # Post-convolutional residual blocks
