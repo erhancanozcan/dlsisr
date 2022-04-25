@@ -43,6 +43,7 @@ class Solver(object):
         self.content_loss = config['content_loss']
         self.load_iters = config['load_iters']
         self.include_batch_norm = config['include_batch_norm']
+        self.lambda_rec = config['lambda_rec']
 
         # Test configurations.
         self.mode = config['mode']
@@ -71,10 +72,27 @@ class Solver(object):
     def build_model(self):
         """Create a generator and a discriminator."""
         self.G = Generator(in_channels=1, out_channels=1, include_batch_norm=self.include_batch_norm)
+
+        # if self.resume_iters:
+        #     pretrained_G = Generator(in_channels=1, out_channels=1, include_batch_norm=True)
+        #     G_path = os.path.join(self.model_save_dir, '{}-G.ckpt'.format(self.load_iters))
+           
+        #     pretrained_G.load_state_dict(torch.load(G_path, map_location=lambda storage, loc: storage))
+        #     pretrained_dict = pretrained_G.state_dict()
+        #     model_dict = self.G.state_dict()
+            
+        #     # remove all the layers that are not present in model
+        #     new_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+        #     # overwrite existing state dictionary
+        #     model_dict.update(new_dict) 
+        #     # load new dictionary
+        #     self.G.load_state_dict(new_dict)
+            
         if self.resume_iters:
             G_path = os.path.join(self.model_save_dir, '{}-G.ckpt'.format(self.load_iters))
             self.G.load_state_dict(torch.load(G_path, map_location=lambda storage, loc: storage))
-
+            
+            
         self.D = Discriminator(in_channels=1)
         self.VGG19 = VGG19Grayscale(self.vgg_feature_layer)
 
@@ -86,6 +104,14 @@ class Solver(object):
 
         self.print_network(self.G, 'G')
         self.print_network(self.D, 'D')
+        
+    def remove_batchnorm(self, x):
+        if isinstance(x, nn.BatchNorm2d):
+            x.reset_parameters()
+            x.eval()
+            with torch.no_grad():
+                x.weight.fill_(1.0)
+                x.bias.zero_()
 
     def to_device(self, *args):
         send = lambda x: x
@@ -178,29 +204,22 @@ class Solver(object):
         
         # Reconstruction loss
         loss_reconstruction = l1(self.ds(imgs_hr),self.ds(gen_hr))
-        """
-        TODO
-            lambda_rec should be hyperparameter and we can try to tune it.
-        """
-        #lambda_rec=1e-1
-        lambda_rec=1
 
         # Perceptual loss
-        g_loss = loss_content + loss_adversarial + lambda_rec * loss_reconstruction
+        g_loss = loss_content + loss_adversarial + self.lambda_rec * loss_reconstruction
 
         return g_loss, loss_content, loss_adversarial, loss_reconstruction
 
     def discriminator_loss(self, imgs_lr, imgs_hr, valid, fake):
-        bce = nn.BCEWithLogitsLoss().to(self.device)
+        bce = nn.BCEWithLogitsLoss(reduction='sum').to(self.device)
 
         # Loss of real and fake images
         dis_real = self.D(imgs_hr)
-        loss_real = bce(dis_real, valid)
         dis_fake = self.D(self.G(imgs_lr).detach())
-        loss_fake = bce(dis_fake, fake)
-        d_loss = loss_real + loss_fake
 
-        return d_loss, loss_real, loss_fake
+        d_loss = bce(torch.cat((dis_real, dis_fake)), torch.cat((valid, 1-valid)))/imgs_hr.shape[0]
+
+        return d_loss
 
     def calculate_losses(self, gen_hr, imgs_hr):
         mse = nn.MSELoss(reduction='sum').to(self.device)
@@ -306,13 +325,11 @@ class Solver(object):
 
                 # Backward and optimize.
                 self.reset_grad()
-                d_loss, loss_real, loss_fake = self.discriminator_loss(imgs_lr, imgs_hr, valid, fake)
+                d_loss = self.discriminator_loss(imgs_lr, imgs_hr, valid, fake)
                 d_loss.backward()
                 self.d_optimizer.step()
 
                 # Logging.
-                loss['D/loss_real'] = loss_real.item()
-                loss['D/loss_fake'] = loss_fake.item()
                 loss['D/loss'] = d_loss.item()
 
                 # =================================================================================== #

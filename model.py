@@ -36,7 +36,7 @@ class ConvolutionalResidualBlock(nn.Module):
     
 class NoBatchNormConvolutionalResidualBlock(nn.Module):
     def __init__(self, k=3, n=64, s=1, p=1):
-        super(ConvolutionalResidualBlock, self).__init__()
+        super(NoBatchNormConvolutionalResidualBlock, self).__init__()
         self.layers = nn.Sequential(
             nn.Conv2d(n, n, kernel_size=k, stride=s, padding=p),
             nn.PReLU(),
@@ -71,9 +71,10 @@ class Generator(nn.Module):
 
         # Residual blocks
         residualBlock = ConvolutionalResidualBlock if include_batch_norm else NoBatchNormConvolutionalResidualBlock
+
         generate_crb = (residualBlock(n=n_features) for _ in range(n_crb))
         self.crbs = nn.Sequential(*list(generate_crb))
-
+        
         # Post-convolutional residual blocks
         self.post = nn.Sequential(
             nn.Conv2d(n_features, n_features, kernel_size=3, stride=1, padding=1),
@@ -96,7 +97,7 @@ class Generator(nn.Module):
         y = self.pre(x)
         z = self.post(self.crbs(y))
         return self.final(self.upsample(y+z))
-
+                
 
 class Discriminator(nn.Module):
     def __init__(self, in_channels=3, alpha=0.2):
