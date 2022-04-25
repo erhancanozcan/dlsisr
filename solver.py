@@ -182,7 +182,7 @@ class Solver(object):
             lambda_rec should be hyperparameter and we can try to tune it.
         """
         #lambda_rec=1e-1
-        lambda_rec=1
+        lambda_rec=10
 
         # Perceptual loss
         g_loss = loss_content + loss_adversarial + lambda_rec * loss_reconstruction
@@ -190,16 +190,15 @@ class Solver(object):
         return g_loss, loss_content, loss_adversarial, loss_reconstruction
 
     def discriminator_loss(self, imgs_lr, imgs_hr, valid, fake):
-        bce = nn.BCEWithLogitsLoss().to(self.device)
+        bce = nn.BCEWithLogitsLoss(reduction='sum').to(self.device)
 
         # Loss of real and fake images
         dis_real = self.D(imgs_hr)
-        loss_real = bce(dis_real, valid)
         dis_fake = self.D(self.G(imgs_lr).detach())
-        loss_fake = bce(dis_fake, fake)
-        d_loss = loss_real + loss_fake
 
-        return d_loss, loss_real, loss_fake
+        d_loss = bce(torch.cat((dis_real, dis_fake)), torch.cat((valid, 1-valid)))/imgs_hr.shape[0]
+
+        return d_loss, d_loss, d_loss
 
     def calculate_losses(self, gen_hr, imgs_hr):
         mse = nn.MSELoss(reduction='sum').to(self.device)

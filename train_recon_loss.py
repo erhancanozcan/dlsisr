@@ -9,8 +9,8 @@ from torch.backends import cudnn
 project_dir = os.path.dirname(os.path.abspath(__file__))
 
 #EXPERIMENTS_DIRECTORY = '/projectnb/dl523/projects/SRGAN/srgan_hw4/experiments/'
-#EXPERIMENTS_DIRECTORY = os.path.join( project_dir, 'checkpoints', datetime.now().strftime("%d%b%y_%H%M%S") ) + '/'
-EXPERIMENTS_DIRECTORY = os.path.join( project_dir, 'checkpoints/24Apr22_112456/' )
+EXPERIMENTS_DIRECTORY = os.path.join( project_dir, 'checkpoints', datetime.now().strftime("%d%b%y_%H%M%S") ) + '/'
+#EXPERIMENTS_DIRECTORY = os.path.join( project_dir, 'checkpoints/24Apr22_112456/' )
 
 def str2bool(v):
     return v.lower() in ('true')
@@ -109,31 +109,35 @@ if __name__ == '__main__':
     cudnn.benchmark = True
     
     #run with mse for first 100
-    #mse_iters = 1000
-    #config = get_experiment_configuration(num_iters=mse_iters, 
-    #      log_step=10, sample_step=10, model_save_step=10, 
-    #      batch_size=8, mode='train', content_loss='mse',
-    #      resume_iters=False, load_iters = 50)
-    #main(config)
-  
-    #config = get_experiment_configuration(num_iters=mse_iters, 
-    #      log_step=50, sample_step=50, model_save_step=50, 
-    #      batch_size=8, mode='test', content_loss='mse',
-    #      resume_iters=True, load_iters = 1000)
-    #main(config)
-    
-    #config = get_experiment_configuration(num_iters=mse_iters, 
-    #      log_step=50, sample_step=50, model_save_step=50, 
-    #      batch_size=8, mode='valid', content_loss='mse',
-    #      resume_iters=True, load_iters = 1000)
-    #main(config)
+    mse_iters = 1000
+    config = get_experiment_configuration(num_iters=mse_iters, 
+          log_step=10, sample_step=10, model_save_step=50, 
+          batch_size=8, mode='train', content_loss='mse',
+          resume_iters=False, load_iters = 50)
+    main(config)
+
+    config = get_experiment_configuration(num_iters=mse_iters, 
+          log_step=50, sample_step=50, model_save_step=50, 
+          batch_size=8, mode='test', content_loss='mse',
+          resume_iters=True, load_iters = 1000)
+    config['result_dir'] = os.path.abspath(os.path.join(config['result_dir'], '..', 'mse_test_result_dir'))
+    os.makedirs(config['result_dir'])
+    main(config)
+
+    config = get_experiment_configuration(num_iters=mse_iters, 
+          log_step=50, sample_step=50, model_save_step=50, 
+          batch_size=8, mode='valid', content_loss='mse',
+          resume_iters=True, load_iters = 1000)
+    config['result_dir'] = os.path.abspath(os.path.join(config['result_dir'], '..', 'mse_valid_result_dir'))
+    os.makedirs(config['result_dir'])
+    main(config)
     
     #run with vgg
-    vgg_iters = mse_iters + 2000
+    vgg_iters = mse_iters + 3000
     config = get_experiment_configuration(num_iters=vgg_iters,
           log_step=50, sample_step=50, model_save_step=50, 
           batch_size=8, mode='train', content_loss='vgg',
-          resume_iters=True, load_iters = mse_iters, vgg_layer = 28, g_lr=1e-5, d_lr=1e-5)
+          resume_iters=True, load_iters = mse_iters, vgg_layer = 28)
     main(config)
       
     config = get_experiment_configuration(num_iters=vgg_iters, 
