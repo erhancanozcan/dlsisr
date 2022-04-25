@@ -32,7 +32,7 @@ def main(config):
 def get_experiment_configuration(num_iters=200000,
           log_step=100, sample_step=100, model_save_step=10000, 
           lr_update_step=100, batch_size=16, mode='train', content_loss='mse', 
-          resume_iters=False, load_iters = 300, vgg_layer = 29):
+          resume_iters=False, load_iters = 300, vgg_layer = 29, include_batch_norm=True):
     config = {}
 
     config['data_dir'] = 'ORL-DATABASE'
@@ -63,6 +63,7 @@ def get_experiment_configuration(num_iters=200000,
     config['device'] = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     config['num_workers'] = 1
     config['mode'] = mode
+    config['include_batch_norm'] = include_batch_norm
 
     # Step size.
     config['log_step'] = log_step #10
@@ -125,18 +126,21 @@ if __name__ == '__main__':
     config = get_experiment_configuration(num_iters=1500, 
           log_step=50, sample_step=50, model_save_step=50, 
           batch_size=8, mode='train', content_loss='vgg',
-          resume_iters=True, load_iters = 500, vgg_layer = 28)
+          resume_iters=True, load_iters = 500, vgg_layer = 28,
+          include_batch_norm=False)
     main(config)
       
     config = get_experiment_configuration(num_iters=1500, 
           log_step=50, sample_step=50, model_save_step=50, 
           batch_size=8, mode='test', content_loss='vgg',
-          resume_iters=False, load_iters=1500)
+          resume_iters=False, load_iters=1500,
+          include_batch_norm=False)
     main(config)
     
     config = get_experiment_configuration(num_iters=1500, 
           log_step=50, sample_step=50, model_save_step=50, 
           batch_size=8, mode='valid', content_loss='vgg',
-          resume_iters=False, load_iters = 1500)
+          resume_iters=False, load_iters = 1500,
+          include_batch_norm=False)
     main(config)
 

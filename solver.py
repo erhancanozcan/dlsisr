@@ -42,6 +42,7 @@ class Solver(object):
         self.resume_iters = config['resume_iters']
         self.content_loss = config['content_loss']
         self.load_iters = config['load_iters']
+        self.include_batch_norm = config['include_batch_norm']
 
         # Test configurations.
         self.mode = config['mode']
@@ -69,7 +70,7 @@ class Solver(object):
 
     def build_model(self):
         """Create a generator and a discriminator."""
-        self.G = Generator(in_channels=1, out_channels=1)
+        self.G = Generator(in_channels=1, out_channels=1, include_batch_norm=self.include_batch_norm)
         if self.resume_iters:
             G_path = os.path.join(self.model_save_dir, '{}-G.ckpt'.format(self.load_iters))
             self.G.load_state_dict(torch.load(G_path, map_location=lambda storage, loc: storage))
