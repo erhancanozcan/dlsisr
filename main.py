@@ -34,6 +34,11 @@ def get_experiment_configuration(num_iters=200000,
           lr_update_step=100, batch_size=16, mode='train', content_loss='mse', 
           resume_iters=False, load_iters = 300, vgg_layer = 28, include_batch_norm=True):
     config = {}
+    
+    config['celebA'] = False # This is a flag controlling the which datasets to consider during training.
+                             # If it is True, then we will consider celebA,too.
+    
+    config['num_samples_from_celebA']=2000  #how many images we want to sample from celebA
 
     config['data_dir'] = 'ORL-DATABASE'
 
