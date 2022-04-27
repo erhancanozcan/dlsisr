@@ -14,7 +14,7 @@ from common.disruptor import downsampler
 #%% Custom ATT dataset loader
 
 class ATTImages(Dataset):
-    def __init__(self, people, hr_resize_dim=(64, 64), lr_desired_dim=(16, 16), mean=0, std=1):
+    def __init__(self, people, hr_resize_dim=(64, 64), lr_desired_dim=(16, 16), mean=0, std=1,celebA_data=None):
         self.people = people
         
         # Normalize grayscale images
@@ -27,6 +27,8 @@ class ATTImages(Dataset):
         self.ds = downsampler()
 
         _, _, self.hr = add_blur_decrease_size(self.people, self.resize_dim, add_blur=False)
+        if celebA_data!=None:
+            self.hr=np.concatenate([self.hr,celebA_data])
         #_, _, self.lr = add_blur_decrease_size(self.hr, self.desired_dim, add_blur=False)
         self.lr = self.ds(self.hr)
 

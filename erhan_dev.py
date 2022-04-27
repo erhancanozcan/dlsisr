@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 
 config = {}
 config['data_dir'] = 'data/ORL-DATABASE'
+config['data_dir'] = 'ORL-DATABASE'
 from common.disruptor import add_blur_decrease_size
 #%%
 
