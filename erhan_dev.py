@@ -47,4 +47,3 @@ plt.imshow(old_lr[0],cmap="gray")
 #%%
 
 
-
