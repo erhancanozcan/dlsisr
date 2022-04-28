@@ -72,21 +72,6 @@ class Solver(object):
     def build_model(self):
         """Create a generator and a discriminator."""
         self.G = Generator(in_channels=1, out_channels=1, include_batch_norm=self.include_batch_norm)
-
-        # if self.resume_iters:
-        #     pretrained_G = Generator(in_channels=1, out_channels=1, include_batch_norm=True)
-        #     G_path = os.path.join(self.model_save_dir, '{}-G.ckpt'.format(self.load_iters))
-           
-        #     pretrained_G.load_state_dict(torch.load(G_path, map_location=lambda storage, loc: storage))
-        #     pretrained_dict = pretrained_G.state_dict()
-        #     model_dict = self.G.state_dict()
-            
-        #     # remove all the layers that are not present in model
-        #     new_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
-        #     # overwrite existing state dictionary
-        #     model_dict.update(new_dict) 
-        #     # load new dictionary
-        #     self.G.load_state_dict(new_dict)
             
         if self.resume_iters:
             G_path = os.path.join(self.model_save_dir, '{}-G.ckpt'.format(self.load_iters))
@@ -217,7 +202,7 @@ class Solver(object):
         dis_real = self.D(imgs_hr)
         dis_fake = self.D(self.G(imgs_lr).detach())
 
-        d_loss = bce(torch.cat((dis_real, dis_fake)), torch.cat((valid, 1-valid)))/imgs_hr.shape[0]
+        d_loss = bce(torch.cat((dis_real, dis_fake)), torch.cat((valid, fake)))/imgs_hr.shape[0]
 
         return d_loss
 
