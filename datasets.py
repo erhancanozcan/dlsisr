@@ -1,5 +1,5 @@
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
@@ -31,7 +31,8 @@ class ATTImages(Dataset):
             pass
         else:
             #convert celebA data from float32 to uint8
-            celebA_uint8 = celebA_data.astype(np.uint8)
+            celebA_uint8 = (celebA_data*256).astype(np.uint8)
+            #plt.imshow(celebA_uint8[1,:,:],cmap='gray')
             # merge 2 datasets together
             self.hr=np.concatenate([self.hr,celebA_uint8])
         #_, _, self.lr = add_blur_decrease_size(self.hr, self.desired_dim, add_blur=False)
@@ -43,4 +44,4 @@ class ATTImages(Dataset):
         return {"lr": lr, "hr": hr}
 
     def __len__(self):
-        return len(self.people)
+        return len(self.hr)

@@ -14,7 +14,6 @@ import numpy as np
 import torchvision.transforms as transforms
 from common.disruptor import downsampler
 
-
 class Solver(object):
     """Solver for training and testing StarGAN."""
 
@@ -185,7 +184,8 @@ class Solver(object):
             loss_content = 0.006*mse(gen_features, real_features.detach())/WH
 
         # Adversarial loss
-        loss_adversarial = bce(self.D(gen_hr), fake)
+        N = imgs_hr.shape[0]
+        loss_adversarial = bce(self.D(gen_hr), fake[:N])
         
         # Reconstruction loss
         loss_reconstruction = l1(self.ds(imgs_hr),self.ds(gen_hr))
@@ -202,8 +202,12 @@ class Solver(object):
         dis_real = self.D(imgs_hr)
         dis_fake = self.D(self.G(imgs_lr).detach())
 
-        d_loss = bce(torch.cat((dis_real, dis_fake)), torch.cat((valid, fake)))/imgs_hr.shape[0]
+        N = imgs_hr.shape[0]
+        is_valid = valid[:N]
+        is_fake = fake[:N]
 
+        d_loss = bce(torch.cat((dis_real, dis_fake)), torch.cat((is_valid, is_fake)))/N
+        
         return d_loss
 
     def calculate_losses(self, gen_hr, imgs_hr):
@@ -257,7 +261,7 @@ class Solver(object):
         d_lr = self.d_lr
 
         # Labels
-        valid = torch.ones(self.batch_size, 1, requires_grad=False)
+        valid = 0.9*torch.ones(self.batch_size, 1, requires_grad=False)
         fake = torch.zeros(self.batch_size, 1, requires_grad=False)
 
         valid, fake = self.to_device(valid, fake)

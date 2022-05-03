@@ -30,14 +30,15 @@ def main(config):
 
 
 def get_experiment_configuration(num_iters=200000,
-          log_step=100, sample_step=100, model_save_step=10000, 
-          lr_update_step=100, batch_size=16, mode='train', content_loss='mse', 
-          resume_iters=False, load_iters = 300, vgg_layer = 28, include_batch_norm=True):
+          log_step=100, sample_step=100, model_save_step=10000,
+          lr_update_step=100, batch_size=16, mode='train', content_loss='mse',
+          resume_iters=False, load_iters = 300, vgg_layer = 28, include_batch_norm=True,
+          lambda_rec=10):
     config = {}
-    
+
     config['celebA'] = True # This is a flag controlling the which datasets to consider during training.
                              # If it is True, then we will consider celebA,too.
-    
+
     config['num_samples_from_celebA'] = 2000  #how many images we want to sample from celebA
 
     config['data_dir'] = 'ORL-DATABASE'
@@ -53,16 +54,16 @@ def get_experiment_configuration(num_iters=200000,
     config['g_lr'] = 0.0001
     config['d_lr'] = 0.0001
     if content_loss == 'vgg':
-        config['g_lr'] = 0.00001
-        config['d_lr'] = 0.00001
+        config['g_lr'] = 0.0001
+        config['d_lr'] = 0.0001
     config['n_critic'] = 5
     config['beta1'] = 0.5 #v
     config['beta2'] = 0.999 #v
     config['resume_iters'] = resume_iters
     config['content_loss'] = content_loss
-    config['vgg_feature_layer'] = vgg_layer 
+    config['vgg_feature_layer'] = vgg_layer
     config['load_iters'] = load_iters
-    config['lambda_rec'] = 10
+    config['lambda_rec'] = lambda_rec
 
     # Miscellaneous.
     config['device'] = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -109,43 +110,46 @@ if __name__ == '__main__':
     # For fast training.
     cudnn.benchmark = True
     #run with mse for first 1000 iter
-    config = get_experiment_configuration(num_iters=1000, 
-          log_step=50, sample_step=50, model_save_step=50, 
-          batch_size=8, mode='train', content_loss='mse',
-          resume_iters=False, load_iters = 0, include_batch_norm=True)
+    config = get_experiment_configuration(num_iters=1000,
+          log_step=100, sample_step=100, model_save_step=100,
+          batch_size=32, mode='train', content_loss='mse',
+          resume_iters=False, load_iters = 0, include_batch_norm=True, 
+          lambda_rec=0)
     main(config)
-  
-    config = get_experiment_configuration(num_iters=1000, 
-          log_step=50, sample_step=50, model_save_step=50, 
-          batch_size=8, mode='test', content_loss='mse',
-          resume_iters=True, load_iters = 1000, include_batch_norm=True)
+
+    config = get_experiment_configuration(num_iters=1000,
+          log_step=100, sample_step=100, model_save_step=100,
+          batch_size=32, mode='test', content_loss='mse',
+          resume_iters=True, load_iters = 1000, include_batch_norm=True,
+          lambda_rec=0)
     main(config)
-    
-    config = get_experiment_configuration(num_iters=500, 
-          log_step=50, sample_step=50, model_save_step=50, 
-          batch_size=8, mode='valid', content_loss='mse',
-          resume_iters=True, load_iters = 1000, include_batch_norm=True)
+
+    config = get_experiment_configuration(num_iters=1000,
+          log_step=100, sample_step=100, model_save_step=100,
+          batch_size=32, mode='valid', content_loss='mse',
+          resume_iters=True, load_iters = 1000, include_batch_norm=True,
+          lambda_rec=0)
     main(config)
-    
+
     #run with vgg
-    # config = get_experiment_configuration(num_iters=2000, 
-    #       log_step=50, sample_step=50, model_save_step=50, 
-    #       batch_size=8, mode='train', content_loss='vgg',
-    #       resume_iters=True, load_iters = 1000, vgg_layer = 28,
-    #       include_batch_norm=True)
-    # main(config)
-      
-    # config = get_experiment_configuration(num_iters=2000, 
-    #       log_step=50, sample_step=50, model_save_step=50, 
-    #       batch_size=8, mode='test', content_loss='vgg',
-    #       resume_iters=False, load_iters=2000,
-    #       include_batch_norm=True)
-    # main(config)
-    
-    # config = get_experiment_configuration(num_iters=2000, 
-    #       log_step=50, sample_step=50, model_save_step=50, 
-    #       batch_size=8, mode='valid', content_loss='vgg',
-    #       resume_iters=False, load_iters = 2000,
-    #       include_batch_norm=True)
-    # main(config)
+    config = get_experiment_configuration(num_iters=6000,
+          log_step=100, sample_step=100, model_save_step=100,
+          batch_size=32, mode='train', content_loss='vgg',
+          resume_iters=True, load_iters = 1000, vgg_layer = 28,
+          lambda_rec=0, include_batch_norm=True)
+    main(config)
+
+    config = get_experiment_configuration(num_iters=6000,
+          log_step=100, sample_step=100, model_save_step=100,
+          batch_size=32, mode='test', content_loss='vgg',
+          resume_iters=False, load_iters=6000,
+          lambda_rec=0, include_batch_norm=True)
+    main(config)
+
+    config = get_experiment_configuration(num_iters=6000,
+          log_step=100, sample_step=100, model_save_step=100,
+          batch_size=32, mode='valid', content_loss='vgg',
+          resume_iters=False, load_iters = 6000,
+          lambda_rec=0, include_batch_norm=True)
+    main(config)
 
